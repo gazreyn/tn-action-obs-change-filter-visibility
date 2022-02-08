@@ -137,5 +137,5 @@ export default class extends AutomationCard.Action()<Props> {
             'filter-name': this.props.filter,
             'filter-enabled': (action === 'show' ? true : false)
         });
-    }
+    } 
 }
