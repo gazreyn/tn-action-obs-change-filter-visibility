@@ -66,4 +66,4 @@ jobs:
       - name: Build
         run: yarn build
       - name: Publish to TNotifier
-        run: tnotifier AUTOMATION_CARD:upload -p
+        run: tnotifier card:upload -p
