@@ -14,7 +14,7 @@ export default class extends AutomationCard.Action()<Props> {
     }
 
     async run() {
-        this.setFilterVisibiliy(
+        this.setFilterVisibility(
             this.props.source,
             this.props.filter,
             this.props.action
@@ -111,22 +111,14 @@ export default class extends AutomationCard.Action()<Props> {
         };
     }
 
-    public async setFilterVisibiliy(source: string, filter: string, action = 'toggle'): Promise<void> {
+    public async setFilterVisibility(source: string, filter: string, action = 'toggle'): Promise<void> {
         if(action === 'toggle') {
-            const fetch = await this.ws.send('GetSourceFilterInfo', {
+            const enabled = (await this.ws.send('GetSourceFilterInfo', {
                 'sourceName': this.props.source,
                 'filterName': this.props.filter
-            });
+            })).enabled;
 
-            console.log("Raw value from fetch");
-            console.log(fetch);
-            
-            const isEnabled = fetch.enabled;
-
-            console.log('State should be: ');
-            console.log(isEnabled);
-
-            this.setFilterVisibiliy(source, filter, (isEnabled ? 'hide' : 'show'));
+            return this.setFilterVisibility(source, filter, (enabled ? 'hide' : 'show'));
         }
         
         this.ws.send('SetSourceFilterVisibility', {
