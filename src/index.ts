@@ -24,23 +24,17 @@ export default class extends AutomationCard.Action()<Props> {
     async prepareProps(staged): Promise<PropList> {
 
         /* Scene */
-        let defaultScene = '';
         const fetch: SceneList = await this.ws.send('GetSceneList');
         const scenes = fetch.scenes.reduce((obj: any, scene) => {
             obj[scene.name] = {
                 text: scene.name,
             };
 
-            if (!defaultScene.length) {
-                defaultScene = scene.name;
-            }
-
             return obj;
         }, {});
         
         /* Source */
         let sources = {};
-        let defaultSource = '';
 
         if(staged.scene) {
             const selectedScene = fetch.scenes.find((scene) => {
@@ -52,30 +46,26 @@ export default class extends AutomationCard.Action()<Props> {
                     text: source.name
                 };
 
-                if(!defaultSource.length) {
-                    defaultSource = source.name;
-                }
-
+                return obj;
             }, {});
         }
 
         /* Filters */
         let filters = {};
-        let defaultFilter = '';
 
         if(staged.source) {
             const fetch = await this.ws.send('GetSourceFilters', {
-                'source-name': staged.source
+                'sourceName': staged.source
             });
+
             filters = fetch.filters.reduce((obj, filter) => {
                 obj[filter.name] = {
                     text: filter.name
                 };
 
-                if(!defaultFilter.length) {
-                    defaultFilter = filter.name;
-                }
+                return obj;
             }, {});
+
         }
 
         
@@ -84,23 +74,22 @@ export default class extends AutomationCard.Action()<Props> {
             scene: {
                 type: PropType.Select,
                 label: 'Scene',
-                default: defaultScene,
                 options: scenes,
+                watch: true
             },
             ...(staged.scene ? {
                 source: {
                     type: PropType.Select,
-                    default: defaultSource,
                     required: true,
                     label: 'Source',
-                    help: 'Select a source',
-                    options: sources
-                }
+                    help: 'Make sure the source has a filter',
+                    options: sources,
+                    watch: true
+                },
             } : {}),
-            ...(staged.source ? {
+            ...(staged.source && Object.keys(filters).length > 0 ? {
                 filter: {
                     type: PropType.Select,
-                    default: defaultFilter,
                     required: true,
                     label: 'Filter',
                     help: 'Select a filter',
@@ -125,17 +114,17 @@ export default class extends AutomationCard.Action()<Props> {
     public async setFilterVisibiliy(source: string, filter: string, action = 'toggle'): Promise<void> {
         if(action === 'toggle') {
             const state = (await this.ws.send('GetSourceFilterInfo', {
-                'source-name': this.props.source,
-                'filter-name': this.props.filter
+                'sourceName': this.props.source,
+                'filterName': this.props.filter
             })).enabled;
 
             this.setFilterVisibiliy(source, filter, (state ? 'hide' : 'show'));
         }
         
         this.ws.send('SetSourceFilterVisibility', {
-            'source-name': this.props.source,
-            'filter-name': this.props.filter,
-            'filter-enabled': (action === 'show' ? true : false)
+            'sourceName': this.props.source,
+            'filterName': this.props.filter,
+            'filterEnabled': (action === 'show' ? true : false)
         });
     } 
 }
