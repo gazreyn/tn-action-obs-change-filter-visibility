@@ -113,10 +113,15 @@ export default class extends AutomationCard.Action()<Props> {
 
     public async setFilterVisibiliy(source: string, filter: string, action = 'toggle'): Promise<void> {
         if(action === 'toggle') {
-            const isEnabled = (await this.ws.send('GetSourceFilterInfo', {
+            const fetch = await this.ws.send('GetSourceFilterInfo', {
                 'sourceName': this.props.source,
                 'filterName': this.props.filter
-            })).enabled;
+            });
+
+            console.log("Raw value from fetch");
+            console.log(fetch);
+            
+            const isEnabled = fetch.enabled;
 
             console.log('State should be: ');
             console.log(isEnabled);
