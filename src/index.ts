@@ -8,7 +8,11 @@ export default class extends AutomationCard.Action()<Props> {
     async mounted(): Promise<void> {
         const { id } = this.identity;
 
-        this.ws = await ws(id);
+        try { 
+            this.ws = await ws(id); 
+        } catch(err) {
+            throw new Error('Unable to connect to OBS Websocket');
+        }
 
         await super.mounted();
     }
